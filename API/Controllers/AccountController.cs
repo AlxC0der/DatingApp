@@ -41,7 +41,7 @@ public class AccountController(
     [HttpPost("login")]
     public async Task<ActionResult<UserResponse>> LoginAsync(LoginRequest request)
     {
-        var user = await context.Users.FirstOrDefaultAsync(x => x.UserName.Equals(request.Username, StringComparison.OrdinalIgnoreCase));
+        var user = await context.Users.FirstOrDefaultAsync(x => x.UserName.ToLower() == request.Username.ToLower());
 
         if (user == null)
         {
@@ -67,5 +67,5 @@ public class AccountController(
     }
 
     private async Task<bool> UserExistsAsync(string username) =>
-        await context.Users.AnyAsync(u => u.UserName.Equals(username, StringComparison.OrdinalIgnoreCase));
+        await context.Users.AnyAsync(u => u.UserName.ToLower() == username.ToLower());
 }

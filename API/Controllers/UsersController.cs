@@ -30,10 +30,7 @@ public class UsersController : BaseApiController
     {
         var user = await _context.Users.FindAsync(id);
 
-        if (user == null)
-        {
-            return NotFound();
-        }
+        if (user == null) return NotFound();
 
         return user;
     }
