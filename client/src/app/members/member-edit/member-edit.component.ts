@@ -1,17 +1,18 @@
-import { Component, HostListener, inject, OnInit, ViewChild } from "@angular/core";
-import { Member } from "../../_models/member";
-import { AccountService } from "../../_services/account.service";
-import { MembersService } from "../../_services/members.service";
-import { TabsModule } from "ngx-bootstrap/tabs";
-import { FormsModule, NgForm } from "@angular/forms";
-import { ToastrService } from "ngx-toastr";
+import { Component, HostListener, inject, OnInit, ViewChild } from '@angular/core';
+import { Member } from '../../_models/member';
+import { AccountService } from '../../_services/account.service';
+import { MembersService } from '../../_services/members.service';
+import { TabsModule } from 'ngx-bootstrap/tabs';
+import { FormsModule, NgForm } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
+import { PhotoEditorComponent } from "../photo-editor/photo-editor.component";
 
 @Component({
-  selector: "app-member-edit",
+  selector: 'app-member-edit',
   standalone: true,
-  imports: [TabsModule, FormsModule],
-  templateUrl: "./member-edit.component.html",
-  styleUrl: "./member-edit.component.css"
+  imports: [TabsModule, FormsModule, PhotoEditorComponent],
+  templateUrl: './member-edit.component.html',
+  styleUrl: './member-edit.component.css'
 })
 export class MemberEditComponent implements OnInit {
   @ViewChild("editForm") editForm?: NgForm;
@@ -33,13 +34,13 @@ export class MemberEditComponent implements OnInit {
     const user = this.accountService.currentUser();
     if (!user) return;
     this.membersService.getMember(user.username).subscribe({
-      next: (member) => (this.member = member)
-    });
+      next: member => this.member = member
+    })
   }
 
   updateMember() {
     this.membersService.updateMember(this.editForm?.value).subscribe({
-      next: (_) => {
+      next: _ => {
         this.toastr.success("Profile updated!");
         this.editForm?.reset(this.member);
       }
