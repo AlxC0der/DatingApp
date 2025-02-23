@@ -1,139 +1,188 @@
-﻿namespace API.UnitTests.Test;
+namespace API.UnitTests.Tests;
 
-using API.DTOs;
-using API.UnitTests.Helpers;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Xunit;
+using API.DTOs;
+using API.UnitTests.Helpers;
+using Newtonsoft.Json.Linq;
 
 public class UsersControllerTests
 {
     private readonly string apiRoute = "api/users";
-    private readonly HttpClient client;
-    private readonly JsonSerializerOptions jsonSerializerOptions;
+    private readonly HttpClient _client;
     private HttpResponseMessage httpResponse;
     private string requestUrl;
-    private string requestObject;
-    private string memberObject;
+    private string loginObject;
     private HttpContent httpContent;
 
     public UsersControllerTests()
     {
-        client = TestHelper.Instance.Client;
-        jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        _client = TestHelper.Instance.Client;
     }
 
-    [Theory]
-    [InlineData("OK", "arenita", "123456")]
-    public async Task GetUsersShouldOK(string statusCode, string username, string password)
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnOk()
     {
         // Arrange
+        var expectedStatusCode = "OK";
         requestUrl = "api/account/login";
-        var request = new LoginRequest
+        var loginRequest = new LoginRequest
         {
-            Username = username,
-            Password = password
+            Username = "arenita",
+            Password = "123456"
         };
 
-        requestObject = GetLoginObject(request);
-        httpContent = GetHttpContent(requestObject);
+        loginObject = GetLoginObject(loginRequest);
+        httpContent = GetHttpContent(loginObject);
 
-        httpResponse = await client.PostAsync(requestUrl, httpContent);
-        var reponse = await httpResponse.Content.ReadAsStringAsync();
-        var userRequest = JsonSerializer.Deserialize<UserResponse>(reponse, jsonSerializerOptions);
+        httpResponse = await _client.PostAsync(requestUrl, httpContent);
+        var response = await httpResponse.Content.ReadAsStringAsync();
+        var userResponse = JsonSerializer.Deserialize<UserResponse>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userRequest!.Token);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userResponse.Token);
 
         requestUrl = $"{apiRoute}";
 
         // Act
-        httpResponse = await client.GetAsync(requestUrl);
+        httpResponse = await _client.GetAsync(requestUrl);
 
         // Assert
-        Assert.Equal(Enum.Parse<HttpStatusCode>(statusCode, true), httpResponse.StatusCode);
-        Assert.Equal(statusCode, httpResponse.StatusCode.ToString());
+        Assert.Equal(Enum.Parse<HttpStatusCode>(expectedStatusCode, true), httpResponse.StatusCode);
+        Assert.Equal(expectedStatusCode, httpResponse.StatusCode.ToString());
     }
 
     [Theory]
-    [InlineData("OK", "arenita", "123456")]
-    public async Task GetUserByUsernameShouldOK(string statusCode, string username, string password)
+    [InlineData("arenita")]
+    public async Task GetByUsernameAsync_ShouldReturnOk(string username)
     {
         // Arrange
+        var expectedStatusCode = "OK";
         requestUrl = "api/account/login";
-        var request = new LoginRequest
+        var loginRequest = new LoginRequest
         {
-            Username = username,
-            Password = password
+            Username = "arenita",
+            Password = "123456"
         };
 
-        requestObject = GetLoginObject(request);
-        httpContent = GetHttpContent(requestObject);
+        loginObject = GetLoginObject(loginRequest);
+        httpContent = GetHttpContent(loginObject);
 
-        httpResponse = await client.PostAsync(requestUrl, httpContent);
-        var reponse = await httpResponse.Content.ReadAsStringAsync();
-        var userRequest = JsonSerializer.Deserialize<UserResponse>(reponse, jsonSerializerOptions);
+        httpResponse = await _client.PostAsync(requestUrl, httpContent);
+        var response = await httpResponse.Content.ReadAsStringAsync();
+        var userResponse = JsonSerializer.Deserialize<UserResponse>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userRequest!.Token);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userResponse.Token);
 
-        requestUrl = $"{apiRoute}/" + username;
+        requestUrl = $"{apiRoute}/{username}";
 
         // Act
-        httpResponse = await client.GetAsync(requestUrl);
+        httpResponse = await _client.GetAsync(requestUrl);
 
         // Assert
-        Assert.Equal(Enum.Parse<HttpStatusCode>(statusCode, true), httpResponse.StatusCode);
-        Assert.Equal(statusCode, httpResponse.StatusCode.ToString());
+        Assert.Equal(Enum.Parse<HttpStatusCode>(expectedStatusCode, true), httpResponse.StatusCode);
+        Assert.Equal(expectedStatusCode, httpResponse.StatusCode.ToString());
     }
-
-    [Theory]
-    [InlineData("NoContent", "bob", "123456", "IntroductionU", "LookingForU", "InterestsU", "CityU", "CountryU")]
-    public async Task UpdateUserShouldNoContent(string statusCode, string username, string password, string introduction, string lookingFor, string interests, string city, string country)
+        [Theory]
+    [InlineData("notExisting")]
+    public async Task GetByUsernameAsync_ShouldReturnNotFound(string username)
     {
         // Arrange
+        var expectedStatusCode = "NotFound";
         requestUrl = "api/account/login";
-        var request = new LoginRequest
+        var loginRequest = new LoginRequest
         {
-            Username = username,
-            Password = password
+            Username = "arenita",
+            Password = "123456"
         };
 
-        requestObject = GetLoginObject(request);
-        httpContent = GetHttpContent(requestObject);
+        loginObject = GetLoginObject(loginRequest);
+        httpContent = GetHttpContent(loginObject);
 
-        httpResponse = await client.PostAsync(requestUrl, httpContent);
-        var reponse = await httpResponse.Content.ReadAsStringAsync();
-        var userRequest = JsonSerializer.Deserialize<UserResponse>(reponse, jsonSerializerOptions);
+        httpResponse = await _client.PostAsync(requestUrl, httpContent);
+        var response = await httpResponse.Content.ReadAsStringAsync();
+        var userResponse = JsonSerializer.Deserialize<UserResponse>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userRequest!.Token);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userResponse.Token);
+
+        requestUrl = $"{apiRoute}/{username}";
+
+        // Act
+        httpResponse = await _client.GetAsync(requestUrl);
+
+        // Assert
+        Assert.Equal(Enum.Parse<HttpStatusCode>(expectedStatusCode, true), httpResponse.StatusCode);
+        Assert.Equal(expectedStatusCode, httpResponse.StatusCode.ToString());
+    }
+      
+
+    [Fact]
+    public async Task UpdateUser_ShouldReturnNoContent_WhenValidRequest()
+    {
+        // Arrange: Autenticar al usuario
+        requestUrl = "api/account/login";
+        var loginRequest = new LoginRequest
+        {
+            Username = "arenita",
+            Password = "123456"
+        };
+
+        loginObject = GetLoginObject(loginRequest);
+        httpContent = GetHttpContent(loginObject);
+
+        httpResponse = await _client.PostAsync(requestUrl, httpContent);
+        httpResponse.EnsureSuccessStatusCode(); // Verificamos que el login fue exitoso
+
+        var responseContent = await httpResponse.Content.ReadAsStringAsync();
+        var userResponse = JsonSerializer.Deserialize<UserResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userResponse.Token);
+
+        // Preparar los datos de actualización
+        var memberUpdateRequest = new MemberUpdateRequest
+        {
+            Introduction = "New introduction",
+            LookingFor = "Looking for new opportunities",
+            Interests = "Reading, Traveling",
+            City = "Mexico City",
+            Country = "Mexico"
+        };
 
         requestUrl = $"{apiRoute}";
-        var response = new MemberResponse
+        httpContent = GetHttpContent(JsonSerializer.Serialize(memberUpdateRequest));
+
+        // Act: Enviar la solicitud PUT
+        httpResponse = await _client.PutAsync(requestUrl, httpContent);
+
+        // Assert: Verificar que la respuesta sea exitosa
+        Assert.Equal(HttpStatusCode.NoContent, httpResponse.StatusCode);
+    }
+    
+[Fact]
+    public async Task UpdateUser_ShouldReturnBadRequest_WhenUserNotAuthenticated()
+    {
+        // Arrange: Preparar datos de actualización sin autenticar al cliente
+        var memberUpdateRequest = new MemberUpdateRequest
         {
-            Introduction = introduction,
-            Interests = interests,
-            LookingFor = lookingFor,
-            City = city,
-            Country = country
+            Introduction = "Introduction without authentication",
+            LookingFor = "Looking for nothing",
+            Interests = "None",
+            City = "Nowhere",
+            Country = "NoCountry"
         };
 
-        memberObject = GetMemberObject(response);
-        httpContent = GetHttpContent(memberObject);
+        requestUrl = $"{apiRoute}";
+        httpContent = GetHttpContent(JsonSerializer.Serialize(memberUpdateRequest));
 
-        // Act
-        httpResponse = await client.PutAsync(requestUrl, httpContent);
+        // Act: Enviar la solicitud PUT sin autenticación
+        httpResponse = await _client.PutAsync(requestUrl, httpContent);
 
-        // Assert
-        Assert.Equal(Enum.Parse<HttpStatusCode>(statusCode, true), httpResponse.StatusCode);
-        Assert.Equal(statusCode, httpResponse.StatusCode.ToString());
+        // Assert: Verificar que la respuesta sea BadRequest (401 Unauthorized)
+        Assert.Equal(HttpStatusCode.Unauthorized, httpResponse.StatusCode);
     }
 
-    #region Privated methods
+    #region Private methods
 
     private static string GetLoginObject(LoginRequest loginDto)
     {
@@ -141,20 +190,6 @@ public class UsersControllerTests
         {
             { nameof(loginDto.Username), loginDto.Username },
             { nameof(loginDto.Password), loginDto.Password }
-        };
-
-        return entityObject.ToString();
-    }
-
-    private static string GetMemberObject(MemberResponse memberDto)
-    {
-        var entityObject = new JObject()
-        {
-            { nameof(memberDto.Introduction), memberDto.Introduction },
-            { nameof(memberDto.LookingFor), memberDto.LookingFor },
-            { nameof(memberDto.Interests), memberDto.Interests },
-            { nameof(memberDto.City), memberDto.City },
-            { nameof(memberDto.Country), memberDto.Country }
         };
 
         return entityObject.ToString();

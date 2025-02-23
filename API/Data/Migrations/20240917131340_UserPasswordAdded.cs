@@ -5,8 +5,8 @@ namespace API.Data.Migrations
     using System.Diagnostics.CodeAnalysis;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    [ExcludeFromCodeCoverage]
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public partial class UserPasswordAdded : Migration
     {
         /// <inheritdoc />
@@ -17,14 +17,14 @@ namespace API.Data.Migrations
                 table: "Users",
                 type: "BLOB",
                 nullable: false,
-                defaultValue: Array.Empty<byte>());
+                defaultValue: new byte[0]);
 
             migrationBuilder.AddColumn<byte[]>(
                 name: "PasswordSalt",
                 table: "Users",
                 type: "BLOB",
                 nullable: false,
-                defaultValue: Array.Empty<byte>());
+                defaultValue: new byte[0]);
         }
 
         /// <inheritdoc />
